@@ -1,26 +1,33 @@
 import typing
 from .utils import *
+from .strategy import StrategySelector
+from .memory import GameMemory
 
-TOKEN = "YOUR_TOKEN_HERE"
+TOKEN = "5dxymvfr"
+
+# Initialize game memory and strategy selector
+memory = GameMemory()
+strategy_selector = StrategySelector()
 
 async def on_tick(state: GameState) -> typing.Union[MoveAction, PhaseAction, OpenChestAction, UseItemAction, SegFaultAction, SkipAction]:
     """
-    fr: Cette fonction est appelée à chaque tick. C'est ici que vous programmez
-        le fonctionnement de votre agent en retournant l'action qui sera executée
-        sur le serveur.
-
-    en: This function is called every tick. Program the behaviour of your agent
-        here by returning the action to be executed on the server.
+    Main tick handler - updates memory and selects best action
     """
+    # Update game memory with current state
+    memory.update(state)
+    
+    # Print minimap for debugging
     print(get_minimap(state))
-    move(state, CardinalDirection.up)
-
+    
+    # Select best strategy based on current state
+    strategy = strategy_selector.select_strategy(state, memory)
+    
+    return move(state, CardinalDirection.up)
+    # Execute the strategy and return the action
+    #return await strategy.execute(state, memory)
 
 async def on_game_start():
     """
-    fr: Cette fonction est appelée une seule fois au début de chaque partie.
-
-    en: This function is called at the beginning of each game.
+    Called once at game start - reset memory
     """
-    pass
-
+    memory.reset()
